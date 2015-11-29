@@ -7,17 +7,12 @@
   <script src="fotorama.js"></script>
 </head>
 <body>
-<div class="fotorama" data-width="700" data-ratio="700/467" data-max-width="100%">
+
 <?php
 session_start();
-if(isset($_SESSION['firstname']){
-$username=$_SESSION['firstname'];
-}
-else
-{
-$username="guest";
-}
-echo $email;
+//$email = $_POST["email"];
+//echo $email;
+
 require 'vendor/autoload.php';
 
 
@@ -26,15 +21,14 @@ $rds = new Aws\Rds\RdsClient([
     'region'  => 'us-east-1'
 ]);
 
-$result = $rds->describeDBInstances(array(
-    'DBInstanceIdentifier' => 'db1'
+$resultrdb = $rds->describeDBInstances(array(
+    'DBInstanceIdentifier' => 'mp1SKread-replica'
    
 ));
-$endpoint = $result['DBInstances'][0]['Endpoint']['Address'];
-    echo "============\n". $endpoint . "================";
+$endpointrdb = $resultrdb['DBInstances'][0]['Endpoint']['Address'];
+  //  echo "============\n". $endpointrdb . "================";
 
-
-$link = mysqli_connect($endpoint,"testconnection1","testconnection1","Project1");
+$linkrdb = mysqli_connect($endpointrdb,"testconnection1","testconnection1","Project1");
 
 if (mysqli_connect_errno()) {
     printf("Connect failed: %s\n", mysqli_connect_error());
@@ -42,38 +36,68 @@ if (mysqli_connect_errno()) {
 }
 
 else {
-echo "Success";
+//echo "Connection to RDB Success";
 }
 
-//below line is unsafe - $email is not checked for SQL injection -- don't do this in real life or use an ORM instead
+if(isset($_SESSION['useremail'])){
+$email=$_SESSION['useremail'];
+//echo $email;
+$linkrdb->real_query("SELECT * FROM MiniProject1 where email='$email'");
+$resrdb = $linkrdb->use_result();
 
-if($username!="guest"){
-$link->real_query("SELECT * FROM MiniProject1 where uname=$username");
-$res = $link->use_result();
-echo "Result set order...\n";
-while ($row = $res->fetch_assoc()) {
+//echo "Result set order...\n";
+echo '<div align="left" class="fotorama" data-width="100" data-ratio="	100/46" data-max-width="50%">';
+while ($row = $resrdb->fetch_assoc()) {
 
-    echo "<img src =\" " . $row['raws3url'] . "\" /><img src =\"" .$row['finisheds3url'] . "\"/>";
-echo $row['id'] . "Email: " . $row['email'];
+    echo "<img src =\"" .$row['finisheds3url'] . "\"/>";
+
 }
+echo'</div>';
+
+$linkrdb->real_query("SELECT * FROM MiniProject1 where email='$email'");
+$resrdb = $linkrdb->use_result();
+//echo "Result set order...\n";
+echo '<div align="right" class="fotorama" data-width="700" data-ratio="700/467" data-max-width="50%">';
+while ($row = $resrdb->fetch_assoc()) {
+
+    echo "<img src =\" " . $row['raws3url'] . "\" />";
+    
+}
+
+echo'</div>';
+
 }
 else
 {
-$link->real_query("SELECT raws3url FROM MiniProject1);
-$res = $link->use_result();
-echo "Result set order...\n";
-while ($row = $res->fetch_assoc()) {
+echo "You have not entered any image";
+
+$linkrdb->real_query("SELECT raws3url FROM MiniProject1");
+$resrdb = $linkrdb->use_result();
+//echo "Result set order...\n";
+echo '<div align="right" class="fotorama" data-width="700" data-ratio="700/467" data-max-width="50%">';
+while ($row = $resrdb->fetch_assoc()) {
 
     echo "<img src =\" " . $row['raws3url'] . "\" />";
-
+    
 }
+
+echo'</div>';
 }
 
-$link->close();
+echo '<div class="errormsg">';
+if((isset($_SESSION['alertmsg']))&&($_SESSION['alertmsg'])){
+echo "Please confirm subcription to receive notification";
+}
+echo '</div>';
 
 
+
+$linkrdb->close();
+
+session_unset();
 ?>
 
-</div>
+
+
 </body>
 </html>
