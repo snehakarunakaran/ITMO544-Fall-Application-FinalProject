@@ -20,6 +20,7 @@ $uploaddir = '/tmp/';
 $uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
 print '<pre>';
 
+
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
   echo "File is valid, and was successfully uploaded.\n";
 }
@@ -34,62 +35,65 @@ print "</pre>";
 
 require 'vendor/autoload.php';
 
+
 $s3 = new Aws\S3\S3Client([
     'version' => 'latest',
     'region'  => 'us-east-1'
 ]);
 #print_r($s3);
 
-$bucket = uniqid("Sneha",false);
+$bucket = uniqid("Final",false);
 
 ## AWS PHP SDK version 3 create bucket
+
 $result = $s3->createBucket([
     'ACL' => 'public-read',
     'Bucket' => $bucket
 ]);
+
 #print_r($result);
+// check for change
 $result = $s3->putObject([
     'ACL' => 'public-read',
     'Bucket' => $bucket,
-   'Key' => $uploadfile,
+   'Key' => "RawURL".$uploadfile,
 'ContentType' => $_FILES['userfile']['type'],
 'Body' => fopen($uploadfile,'r+')
 ]);
+
 $url = $result['ObjectURL'];
 echo $url;
 
 ##s3 and url for the thumbnailimage
-$thumbimageobj = new Imagick($uploadfile);
-$thumbimageobj->thumbnailImage(200, null);
 
-$bucketfinished=uniquid("finishedimage",false);
-$resultfinished = $s3->createBucket([
-    'ACL' => 'public-read',
-    'Bucket' => $bucketfinished
-]);
-#print_r($resultfinished);
+$thumbimageobj = new Imagick($uploadfile);
+$thumbimageobj->thumbnailImage(80,80);
+$thumbimageobj->writeImage();
+
+echo "thumbnail";
+
+//print_r($resultfinished);
 $resultfinished = $s3->putObject([
     'ACL' => 'public-read',
-    'Bucket' => $bucketfinished,
-   'Key' => $thumbimageobj,
+    'Bucket' => $bucket,
+   'Key' => "FinishedURL".$uploadfile,
 'ContentType' => $_FILES['userfile']['type'],
-'Body' => fopen($thumbimageobj,'r+')
+'Body' => fopen($uploadfile,'r+')
 ]);
 $finishedurl = $resultfinished['ObjectURL'];
 echo $finishedurl;
 
-//thumbnail code ends here
 
 $rds = new Aws\Rds\RdsClient([
     'version' => 'latest',
     'region'  => 'us-east-1'
 ]);
 
-$result = $rds->describeDBInstances(array(
+$resultdb = $rds->describeDBInstances(array(
     'DBInstanceIdentifier' => 'db1'
    
 ));
-$endpoint = $result['DBInstances'][0]['Endpoint']['Address'];
+$endpoint = $resultdb['DBInstances'][0]['Endpoint']['Address'];
     echo "============\n". $endpoint . "================";
 
 $link = mysqli_connect($endpoint,"testconnection1","testconnection1","Project1");
@@ -114,19 +118,19 @@ $sns = new Aws\Sns\SnsClient([
 //echo "sns Topic";
 //to list topics
 
-$result = $sns->listTopics(array(
+$resultsns = $sns->listTopics(array(
 
 ));
 
 
-foreach ($result['Topics'] as $key => $value){
+foreach ($resultsns['Topics'] as $key => $value){
 
-if(preg_match("/ImageTopicSK/", $result['Topics'][$key]['TopicArn'])){
-$topicARN =$result['Topics'][$key]['TopicArn'];
+if(preg_match("/ImageTopicSK/", $resultsns['Topics'][$key]['TopicArn'])){
+$topicARN =$resultsns['Topics'][$key]['TopicArn'];
 }
 }
 
-$uname=$_POST['username'];
+$uname=$_POST['firstname'];
 $email = $_POST['useremail'];
 $phoneforsms = $_POST['phone'];
 $raws3url = $url; 
@@ -136,7 +140,7 @@ $state=0;
 
 $res = $link->query("SELECT * FROM MiniProject1 where email='$email'");
 
-if($res->num_rows>0){
+//if($res->num_rows>0){
 
 if (!($stmt = $link->prepare("INSERT INTO MiniProject1 (uname,email,phoneforsms,raws3url,finisheds3url,jpegfilename,state) VALUES (?,?,?,?,?,?,?)"))) {
     echo "Prepare failed: (" . $link->errno . ") " . $link->error;
@@ -151,6 +155,7 @@ printf("%d Row inserted.\n", $stmt->affected_rows);
 
 $stmt->close();
 
+if($res->num_rows>0){
 $pub = $sns->publish(array(
     'TopicArn' => $topicARN,
     // Message is required
@@ -159,20 +164,8 @@ $pub = $sns->publish(array(
     
     
 ));
-
-$link->real_query("SELECT * FROM MiniProject1");
-$res = $link->use_result();
-echo "Result set order...\n";
-while ($row = $res->fetch_assoc()) {
-    echo $row['id'] . " " . $row['email']. " " . $row['phoneforsms'];
 }
 
-$link->close();
-
-$url	= "gallery.php";
-   header('Location: ' . $url, true);
-   die();
-}
 else 
 {
 
@@ -181,6 +174,50 @@ $url	= "temp.php";
    die();
 
 }
+
+#RDB Connection:
+
+$resultrdb = $rds->describeDBInstances(array(
+    'DBInstanceIdentifier' => 'mp1SKread-replica'
+   
+));
+$endpointrdb = $resultrdb['DBInstances'][0]['Endpoint']['Address'];
+    echo "============\n". $endpointrdb . "================";
+
+$linkrdb = mysqli_connect($endpointrdb,"testconnection1","testconnection1","Project1");
+
+if (mysqli_connect_errno()) {
+    printf("Connect failed: %s\n", mysqli_connect_error());
+    exit();
+}
+
+else {
+echo "Connection to RDB Success";
+}
+
+
+$linkrdb->real_query("SELECT * FROM MiniProject1");
+$resrdb = $linkrdb->use_result();
+echo "Result set order...\n";
+while ($row = $resrdb->fetch_assoc()) {
+    echo $row['id'] . " " . $row['email']. " " . $row['phoneforsms'];
+}
+
+$link->close();
+$linkrdb->close();
+
+$url	= "gallery.php";
+   header('Location: ' . $url, true);
+   die();
+//}
+//else 
+//{
+
+//$url	= "temp.php";
+//   header('Location: ' . $url, true);
+//   die();
+
+//}
 ?> 
 
      
