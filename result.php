@@ -82,7 +82,7 @@ $resultfinished = $s3->putObject([
 ]);
 $finishedurl = $resultfinished['ObjectURL'];
 echo $finishedurl;
-
+$emailtemp = $_POST['useremail'];
 
 $rds = new Aws\Rds\RdsClient([
     'version' => 'latest',
@@ -129,6 +129,26 @@ if(preg_match("/ImageTopicSK/", $resultsns['Topics'][$key]['TopicArn'])){
 $topicARN =$resultsns['Topics'][$key]['TopicArn'];
 }
 }
+//extra code
+$resultsub = $sns->listSubscriptionsByTopic(array(
+     //TopicArn is required
+    'TopicArn' => $topicARN,
+   
+));
+foreach ($resultsub['Subscriptions'] as $key => $value){
+
+if((preg_match($emailtemp, $resultsub['Subscriptions'][$key]['endpoint']))&&(preg_match("PendingConfirmation", $resultsub['Subscriptions'][$key]['SubscriptionArn']))){
+$alertmsg='true';
+$_SESSION['alertmsg']=$alertmsg;
+}
+else{
+$alertmsg='false';
+$_SESSION['alertmsg']=$alertmsg;
+}
+}
+
+
+
 
 $uname=$_POST['firstname'];
 $email = $_POST['useremail'];
