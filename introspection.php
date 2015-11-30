@@ -1,6 +1,9 @@
 <?php
+session_start();
 require 'vendor/autoload.php';
-
+$introspec=true;
+$_SESSION['introspec']=$introspec;
+echo "=========== $introspec =======";
 
 $rds = new Aws\Rds\RdsClient([
     'version' => 'latest',
@@ -26,11 +29,44 @@ echo "Connection to RDB Success";
 }
 
 
-$tableName  = 'MiniProject1';
-$backupFile = 'FP_database_backup_'.date('G_a_m_d_y').'.sql';
-$query      = "SELECT * INTO OUTFILE '$backupFile' FROM $tableName";
-$result = mysql_query($query);
+$backupFile = '/tmp/FinalProjectDB'.date("Y-m-d-H-i-s").'.gz';
+$command = "mysqldump --opt -h $endpointrdb -u testconnection1 -ptestconnection1 Project1 | gzip > $backupFile";
+exec($command);
+echo "success";
 
+
+			$s3 = new Aws\S3\S3Client([
+				'version' => 'latest',
+				'region'  => 'us-east-1'
+			]);
+
+$bucket='snehafinalproject-'.rand().'-dbdump';
+			if(!$s3->doesBucketExist($bucket)) {
+				
+				$result = $s3->createBucket([
+					'ACL' => 'public-read',
+					'Bucket' => $bucket,
+				]);
+	
+				$s3->waitUntil('BucketExists', array('Bucket' => $bucket));
+				echo "$bucket Created Successfully";
+			}
+
+$result = $s3->putObject([
+'ACL' => 'public-read',
+'Bucket' => $bucket,
+'Key' => $backupFile,
+'SourceFile'   => $backupFile,
+'Body' => fopen($backupFile,'r+'),
+]);
+echo "backup success";
+$url = $result['ObjectURL'];
+echo $url;
+
+
+$urlintro	= "index.php";
+   header('Location: ' . $urlintro, true);
+   die();
 
 $linkrdb->close();
 ?>

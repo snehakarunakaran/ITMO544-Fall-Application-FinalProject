@@ -30,7 +30,7 @@ raws3url VARCHAR(256),
 finisheds3url VARCHAR(256),
 jpegfilename VARCHAR(256),
 state tinyint(3) CHECK(state IN(0,1,2)),
-datetime timestamp
+datetimeentry DATETIME DEFAULT CURRENT_TIMESTAMP
 )");
 
 shell_exec("chmod 600 setup.php");

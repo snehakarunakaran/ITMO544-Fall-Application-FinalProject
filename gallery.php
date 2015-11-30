@@ -82,6 +82,7 @@ while ($row = $resrdb->fetch_assoc()) {
 }
 
 echo'</div>';
+
 }
 
 echo '<div class="errormsg">';
@@ -89,12 +90,17 @@ if((isset($_SESSION['alertmsg']))&&($_SESSION['alertmsg'])){
 echo "Please confirm subcription to receive notification";
 }
 echo '</div>';
+/*if((isset($_SESSION['introspec']))&&($_SESSION['introspec'])){
+echo "DB Dump in progress....";
+}
 
-
+*/
 
 $linkrdb->close();
 
+
 session_unset();
+echo "<a href='index.php'/>home!!!</a>"
 ?>
 
 
