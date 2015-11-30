@@ -91,7 +91,7 @@ echo "Please confirm subcription to receive notification";
 }
 echo '</div>';
 if((isset($_SESSION['introspec']))&&($_SESSION['introspec'])){
-echo "DB Dump in progress....";
+echo "DB Dump in progress....Click home to upload new image: ";
 }
 
 
