@@ -100,7 +100,7 @@ $linkrdb->close();
 
 
 session_unset();
-echo "<a href='index.php'/>home!!!</a>"
+echo "<a href='index.php'/>home!!!</a>";
 ?>
 
 
