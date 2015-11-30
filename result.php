@@ -61,13 +61,35 @@ $result = $s3->putObject([
 'Body' => fopen($uploadfile,'r+')
 ]);
 
+$result = $s3->putBucketLifecycleConfiguration([
+		'Bucket' => $bucket, // REQUIRED
+		'LifecycleConfiguration' => [
+			'Rules' => [ // REQUIRED
+				[
+				'Expiration' => [
+
+				'Days' => 2,
+				],	
+
+			'NoncurrentVersionExpiration' => [
+			'NoncurrentDays' => 2,
+				],
+
+			'Prefix' => '', // REQUIRED
+			'Status' => 'Enabled', // REQUIRED
+
+			],
+			],
+		],
+	]);
+
 $url = $result['ObjectURL'];
 echo $url;
 
 ##s3 and url for the thumbnailimage
 
 $thumbimageobj = new Imagick($uploadfile);
-$thumbimageobj->thumbnailImage(80,80);
+$thumbimageobj->thumbnailImage(150,150);
 $thumbimageobj->writeImage();
 
 echo "thumbnail";
@@ -80,6 +102,31 @@ $resultfinished = $s3->putObject([
 'ContentType' => $_FILES['userfile']['type'],
 'Body' => fopen($uploadfile,'r+')
 ]);
+
+$resultfinished = $s3->putBucketLifecycleConfiguration([
+		'Bucket' => $bucket, // REQUIRED
+		'LifecycleConfiguration' => [
+			'Rules' => [ // REQUIRED
+				[
+				'Expiration' => [
+
+				'Days' => 2,
+				],	
+
+			'NoncurrentVersionExpiration' => [
+			'NoncurrentDays' => 2,
+				],
+
+			'Prefix' => '', // REQUIRED
+			'Status' => 'Enabled', // REQUIRED
+
+			],
+			],
+		],
+	]);
+
+
+
 $finishedurl = $resultfinished['ObjectURL'];
 echo $finishedurl;
 $emailtemp = $_POST['useremail'];

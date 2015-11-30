@@ -40,7 +40,7 @@ echo "success";
 				'region'  => 'us-east-1'
 			]);
 
-$bucket='snehafinalproject-'.rand().'-dbdump';
+$bucket='snehatestproject-'.rand().'-dbdump';
 			if(!$s3->doesBucketExist($bucket)) {
 				
 				$result = $s3->createBucket([
@@ -52,13 +52,38 @@ $bucket='snehafinalproject-'.rand().'-dbdump';
 				echo "$bucket Created Successfully";
 			}
 
+
+
 $result = $s3->putObject([
 'ACL' => 'public-read',
 'Bucket' => $bucket,
 'Key' => $backupFile,
 'SourceFile'   => $backupFile,
-'Body' => fopen($backupFile,'r+'),
+
 ]);
+
+$result = $s3->putBucketLifecycleConfiguration([
+		'Bucket' => $bucket, // REQUIRED
+		'LifecycleConfiguration' => [
+			'Rules' => [ // REQUIRED
+				[
+				'Expiration' => [
+
+				'Days' => 2,
+				],	
+
+			'NoncurrentVersionExpiration' => [
+			'NoncurrentDays' => 2,
+				],
+
+			'Prefix' => '', // REQUIRED
+			'Status' => 'Enabled', // REQUIRED
+
+			],
+			],
+		],
+	]);
+
 echo "backup success";
 $url = $result['ObjectURL'];
 echo $url;

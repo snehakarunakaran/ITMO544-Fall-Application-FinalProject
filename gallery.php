@@ -90,11 +90,11 @@ if((isset($_SESSION['alertmsg']))&&($_SESSION['alertmsg'])){
 echo "Please confirm subcription to receive notification";
 }
 echo '</div>';
-/*if((isset($_SESSION['introspec']))&&($_SESSION['introspec'])){
+if((isset($_SESSION['introspec']))&&($_SESSION['introspec'])){
 echo "DB Dump in progress....";
 }
 
-*/
+
 
 $linkrdb->close();
 

@@ -2,10 +2,11 @@
 session_start(); 
 ?>
 <html>
-<head><title>Hello app</title>
+<head><title>Sneha Karunakaran MP Final</title>
 <meta charset="UTF-8">
 </head>
 <body>
+<div align ="center"> <h2> ITMO 544 Final Project</h2></div>
 <div align="right">
 <ul>
 <li><a href='gallery.php'/>View Images!</a></li>
@@ -19,8 +20,8 @@ echo "MySQL dump in progress Admin has disabled form! Click on view Images to vi
 }
 else
 {
-echo 'test';
-echo (isset($_SESSION['introspec']));
+//echo 'test';
+//echo (isset($_SESSION['introspec']));
 ?>
 <div align="center">
 <!-- The data encoding type, enctype, MUST be specified as below -->
