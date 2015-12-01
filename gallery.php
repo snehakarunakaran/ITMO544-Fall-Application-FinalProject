@@ -97,7 +97,7 @@ echo'</div>';
 
 echo '<div class="errormsg">';
 if((isset($_SESSION['alertmsg']))&&($_SESSION['alertmsg'])){
-echo "Please confirm subcription to receive notification";
+echo "Please confirm subcription sent to your emailid to receive notification";
 }
 echo '</div>';
 if((isset($_SESSION['introspec']))&&($_SESSION['introspec'])){
