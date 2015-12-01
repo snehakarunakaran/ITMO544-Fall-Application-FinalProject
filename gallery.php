@@ -45,25 +45,31 @@ $email=$_SESSION['useremail'];
 $linkrdb->real_query("SELECT * FROM MiniProject1 where email='$email'");
 $resrdb = $linkrdb->use_result();
 
-echo "Raw Images\n";
+echo '<div align="left" style="width:864px;">';
+echo "Finished Images\n";
 echo '<div align="left" class="fotorama" data-width="100" data-ratio="	100/46" data-max-width="50%">';
+
 while ($row = $resrdb->fetch_assoc()) {
 
     echo "<img src =\"" .$row['finisheds3url'] . "\"/>";
 
 }
 echo'</div>';
+echo'</div>';
 
 $linkrdb->real_query("SELECT * FROM MiniProject1 where email='$email'");
 $resrdb = $linkrdb->use_result();
+echo '<div align="left" style="width:864px;">';
 echo "Raw Images\n";
-echo '<div align="right" class="fotorama" data-width="700" data-ratio="700/467" data-max-width="50%">';
+echo '<div align="left" class="fotorama" data-width="700" data-ratio="700/467" data-max-width="50%">';
+
 while ($row = $resrdb->fetch_assoc()) {
 
     echo "<img src =\" " . $row['raws3url'] . "\" />";
     
 }
 
+echo'</div>';
 echo'</div>';
 
 }
@@ -73,8 +79,10 @@ echo "You have not entered any image";
 
 $linkrdb->real_query("SELECT raws3url FROM MiniProject1");
 $resrdb = $linkrdb->use_result();
+echo'<div align="center" style="width:864px;">';
 echo "Raw Images\n";
-echo '<div align="right" class="fotorama" data-width="700" data-ratio="700/467" data-max-width="50%">';
+echo '<div align="center" class="fotorama" data-width="700" data-ratio="700/467" data-max-width="50%">';
+
 while ($row = $resrdb->fetch_assoc()) {
 
     echo "<img src =\" " . $row['raws3url'] . "\" />";
@@ -82,6 +90,8 @@ while ($row = $resrdb->fetch_assoc()) {
 }
 
 echo'</div>';
+echo'</div>';
+
 
 }
 
